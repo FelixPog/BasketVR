@@ -4,17 +4,17 @@ using UnityEngine.XR;
 [RequireComponent(typeof(LineRenderer))]
 public class ControllerInput : MonoBehaviour
 {
-    public XRNode controllerNode;
+    public XRNode deviceNode;
     public float maxDistance = 10f;
     public LayerMask interactableLayers;
     
-    private InputDevice controller;
+    private InputDevice device;
     private LineRenderer lineRenderer;
-    private GameObject grabbedObject = null;
+    private Pickable pickable = null;
     
     void Start()
     {
-        controller = InputDevices.GetDeviceAtXRNode(controllerNode);
+        device = InputDevices.GetDeviceAtXRNode(deviceNode);
         lineRenderer = GetComponent<LineRenderer>();
     }
 
@@ -22,26 +22,32 @@ public class ControllerInput : MonoBehaviour
     {
         RaycastHit hit = AimingRaycast();
 
-        if (grabbedObject == null && hit.collider != null && IsGrabbing())
+        if (pickable == null && hit.collider != null && IsGrabbing())
         {
-            GameObject hitObject = hit.collider.gameObject;
-            
-            if (hitObject.GetComponent<Pickable>())
+            pickable = hit.collider.gameObject.GetComponent<Pickable>();
+            if (pickable != null)
             {
-                grabbedObject = hitObject;
-                hitObject.transform.parent = transform;
+                pickable.Pickup(this);
             }
         }
-        else if (grabbedObject != null && !IsGrabbing())
+        else if (pickable != null && !IsGrabbing())
         {
-            grabbedObject.transform.parent = null;
-            grabbedObject = null;
+            pickable.Release(this, device);
+            pickable = null;
         }
     }
 
     private RaycastHit AimingRaycast()
     {
         Vector3 origin = transform.position;
+        
+        if (pickable != null)
+        {
+            lineRenderer.SetPosition(0, origin);
+            lineRenderer.SetPosition(1, origin);
+            return new RaycastHit();
+        }
+        
         Vector3 direction = transform.forward;
 
         Ray ray = new Ray(origin, direction);
@@ -65,7 +71,7 @@ public class ControllerInput : MonoBehaviour
     
     private bool IsGrabbing()
     {
-        if (controller.TryGetFeatureValue(CommonUsages.gripButton, out bool isGrabbing))
+        if (device.TryGetFeatureValue(CommonUsages.gripButton, out bool isGrabbing))
         {
             return isGrabbing;
         }

@@ -1183,7 +1183,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1e-45, z: 6e-44, w: 3.4e-44}
+  m_BoundingSphereOverride: {x: 0, y: 6e-44, z: 9e-44, w: 1.293e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -2884,7 +2884,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5e479aa968f316479281b8d564d8467, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controllerNode: 4
+  deviceNode: 4
   maxDistance: 10
   interactableLayers:
     serializedVersion: 2
@@ -4132,7 +4132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5e479aa968f316479281b8d564d8467, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controllerNode: 5
+  deviceNode: 5
   maxDistance: 10
   interactableLayers:
     serializedVersion: 2
