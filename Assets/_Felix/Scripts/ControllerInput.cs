@@ -30,10 +30,13 @@ public class ControllerInput : MonoBehaviour
     public float turnSpeed = 60.0f;
     
     
+    private Vector3 lastPosition = Vector3.zero; 
+    
     void Start()
     {
         device = InputDevices.GetDeviceAtXRNode(deviceNode);
         lineRenderer = GetComponent<LineRenderer>();
+        lastPosition = transform.position;
     }
 
     void Update()
@@ -178,6 +181,7 @@ public class ControllerInput : MonoBehaviour
 
     private void ComputeAverageVelocity()
     {
+        
         if (device.TryGetFeatureValue(CommonUsages.deviceVelocity, out Vector3 velocityInput)
             && device.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out Vector3 angularVelocityInput))
         {
@@ -188,6 +192,11 @@ public class ControllerInput : MonoBehaviour
             while (velocityBuffer.Count > 0 && now - velocityBuffer.Peek().timestamp > velocityBufferDuration)
             {
                 velocityBuffer.Dequeue();
+            }
+            
+            while (angularVelocityBuffer.Count > 0 && now - angularVelocityBuffer.Peek().timestamp > velocityBufferDuration)
+            {
+                angularVelocityBuffer.Dequeue();
             }
         }
     }
