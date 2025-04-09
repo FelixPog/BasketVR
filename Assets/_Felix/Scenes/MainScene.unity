@@ -286,17 +286,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 726451880403577126, guid: a480f2c76b8079a4eba3cff41b6c7158, type: 3}
+      propertyPath: throwPowerMultiplier
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7484792120703961137, guid: a480f2c76b8079a4eba3cff41b6c7158, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.358
+      value: 1.266
       objectReference: {fileID: 0}
     - target: {fileID: 7484792120703961137, guid: a480f2c76b8079a4eba3cff41b6c7158, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.81
+      value: 0.45
       objectReference: {fileID: 0}
     - target: {fileID: 7484792120703961137, guid: a480f2c76b8079a4eba3cff41b6c7158, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.55135965
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7484792120703961137, guid: a480f2c76b8079a4eba3cff41b6c7158, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1232,7 +1236,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.02e-43, y: 1e-45, z: 6e-44, w: 3.5e-44}
+  m_BoundingSphereOverride: {x: 1.02e-43, y: -3.339948e-36, z: 7.37e-43, w: 5.1358e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -2941,7 +2945,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   grabInteractionZone: {fileID: 673935046}
-  velocityBufferDuration: 0.25
+  velocityBufferDuration: 0.5
+  pickVelocityToUse: 10
   movementSpeed: 3
   characterController: {fileID: 1446645227303682992}
   turnSpeed: 45
@@ -4194,7 +4199,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   grabInteractionZone: {fileID: 1439869419}
-  velocityBufferDuration: 0.25
+  velocityBufferDuration: 0.5
+  pickVelocityToUse: 10
   movementSpeed: 3
   characterController: {fileID: 1446645227303682992}
   turnSpeed: 45

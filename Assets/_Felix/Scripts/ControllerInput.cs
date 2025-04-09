@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -17,6 +18,7 @@ public class ControllerInput : MonoBehaviour
     public LayerMask interactableLayers;
     public SphereCollider grabInteractionZone;
     public float velocityBufferDuration = 0.25f;
+    public int pickVelocityCount = 10;
     
     private LineRenderer lineRenderer;
     private Pickable pickable = null;
@@ -52,14 +54,14 @@ public class ControllerInput : MonoBehaviour
         TryGrabAndRelease();
     }
 
-    public Vector3 GetAverageVelocity()
+    public Vector3 GetPeakAverageVelocity()
     {
-        return GetAverageVectorFromBuffer(velocityBuffer);
+        return GetPeakAverageVectorFromBuffer(velocityBuffer);
     }
 
-    public Vector3 GetAverageAngularVelocity()
+    public Vector3 GetPeakAverageAngularVelocity()
     {
-        return GetAverageVectorFromBuffer(angularVelocityBuffer);
+        return GetPeakAverageVectorFromBuffer(angularVelocityBuffer);
     }
     
     private RaycastHit AimingRaycast()
@@ -181,7 +183,6 @@ public class ControllerInput : MonoBehaviour
 
     private void ComputeAverageVelocity()
     {
-        
         if (device.TryGetFeatureValue(CommonUsages.deviceVelocity, out Vector3 velocityInput)
             && device.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out Vector3 angularVelocityInput))
         {
@@ -201,19 +202,15 @@ public class ControllerInput : MonoBehaviour
         }
     }
 
-    private Vector3 GetAverageVectorFromBuffer(Queue<(Vector3 velocity, float timestamp)> vectorBuffer)
+    private Vector3 GetPeakAverageVectorFromBuffer(Queue<(Vector3 velocity, float timestamp)> vectorBuffer)
     {
-        if (vectorBuffer.Count == 0)
-        {
-            return Vector3.zero;
-        }
+        List<Vector3> peakVelocities = vectorBuffer
+            .OrderByDescending(peakVelocity => peakVelocity.velocity.magnitude)
+            .Take(pickVelocityCount)
+            .Select(peakVelocity => peakVelocity.velocity)
+            .ToList();
 
-        Vector3 velocitySum = Vector3.zero;
-        foreach ((Vector3 velocity, float timeStamp) in vectorBuffer)
-        {
-            velocitySum += velocity;
-        }
-        
-        return velocitySum / vectorBuffer.Count;
+        Vector3 averagePeak = peakVelocities.Aggregate(Vector3.zero, (sum, v) => sum + v) / peakVelocities.Count;
+        return averagePeak;
     }
 }

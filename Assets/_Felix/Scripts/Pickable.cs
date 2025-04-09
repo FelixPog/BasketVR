@@ -1,11 +1,13 @@
-using System;
 using UnityEngine;
-using UnityEngine.XR;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
 public class Pickable : MonoBehaviour
 {
+    [Min(0.0f)] public float throwPowerMultiplier = 1.5f;
+    //[Min(0.0f)] public float maxVelocity = 30.0f;
+    
+    private bool shouldRelease;
     private Rigidbody rigidBody;
     private ControllerInput controller;
     
@@ -16,12 +18,21 @@ public class Pickable : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // This choice was made instead of re-parenting transform to avoid subtle position issue when moving the controller really fast
-
-        if (controller != null)
+        if (controller != null && !shouldRelease)
         {
+            // This choice was made instead of re-parenting transform to avoid subtle position issue when moving the controller really fast
             rigidBody.MovePosition(controller.transform.position);
             rigidBody.MoveRotation(controller.transform.rotation);
+        }
+        else if (controller != null && shouldRelease)
+        {
+            shouldRelease = false;
+            Vector3 velocity = controller.GetPeakAverageVelocity();
+            rigidBody.velocity = velocity * throwPowerMultiplier;
+            rigidBody.angularVelocity = rigidBody.angularVelocity = controller.GetPeakAverageAngularVelocity();
+            controller = null;
+            transform.parent = null;
+            rigidBody.isKinematic = false;
         }
     }
 
@@ -41,13 +52,6 @@ public class Pickable : MonoBehaviour
             return;
         }
         
-        rigidBody.velocity = controller.GetAverageVelocity();
-        rigidBody.angularVelocity = controller.GetAverageAngularVelocity();
-        
-        controller = null;
-        transform.parent = null;
-        rigidBody.isKinematic = false;
-        
-        
+        shouldRelease = true;
     }
 }
