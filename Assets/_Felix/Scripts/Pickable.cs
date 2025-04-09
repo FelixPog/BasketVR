@@ -7,7 +7,7 @@ using UnityEngine.XR;
 public class Pickable : MonoBehaviour
 {
     private Rigidbody rigidBody;
-    private ControllerInput grabbingController;
+    private ControllerInput controller;
     
     void Start()
     {
@@ -18,16 +18,16 @@ public class Pickable : MonoBehaviour
     {
         // This choice was made instead of re-parenting transform to avoid subtle position issue when moving the controller really fast
 
-        if (grabbingController != null)
+        if (controller != null)
         {
-            rigidBody.MovePosition(grabbingController.transform.position);
-            rigidBody.MoveRotation(grabbingController.transform.rotation);
+            rigidBody.MovePosition(controller.transform.position);
+            rigidBody.MoveRotation(controller.transform.rotation);
         }
     }
 
     public void Pickup(ControllerInput controller)
     {
-        grabbingController =  controller;
+        this.controller =  controller;
         
         transform.localPosition = Vector3.zero;
         rigidBody.isKinematic = true;
@@ -36,7 +36,7 @@ public class Pickable : MonoBehaviour
 
     public void Release(ControllerInput releaseController, InputDevice releaseDevice)
     {
-        if (releaseController != grabbingController)
+        if (releaseController != controller)
         {
             return;
         }
@@ -44,12 +44,11 @@ public class Pickable : MonoBehaviour
         if (releaseDevice.TryGetFeatureValue(CommonUsages.deviceVelocity, out Vector3 velocity)
             && releaseDevice.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out Vector3 angularVelocity))
         {
-            Debug.DrawRay(transform.position, velocity, Color.green, 2f);
             rigidBody.velocity = velocity;
             rigidBody.angularVelocity = angularVelocity;
         }
         
-        grabbingController = null;
+        controller = null;
         transform.parent = null;
         rigidBody.isKinematic = false;
         

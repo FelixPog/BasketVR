@@ -8,6 +8,8 @@ public class ControllerInput : MonoBehaviour
     public float maxDistance = 10f;
     public LayerMask interactableLayers;
 
+    public SphereCollider grabInteractionZone;
+    
     public float movementSpeed = 5.0f;
     public CharacterController characterController;
     public float turnSpeed = 60.0f;
@@ -26,7 +28,8 @@ public class ControllerInput : MonoBehaviour
     {
         UpdatePlayerPosition();
         UpdatePlayerRotation();
-        PickupAndRelease(AimingRaycast());
+        TryPickupAndRelease(AimingRaycast());
+        TryGrabAndRelease();
     }
 
     private RaycastHit AimingRaycast()
@@ -61,18 +64,27 @@ public class ControllerInput : MonoBehaviour
         return hit;
     }
     
-    private bool IsGrabbing()
+    private bool IsTriggerPressed()
     {
-        if (device.TryGetFeatureValue(CommonUsages.triggerButton, out bool isGrabbing))
+        if (device.TryGetFeatureValue(CommonUsages.triggerButton, out bool isTriggerPressed))
         {
-            return isGrabbing;
+            return isTriggerPressed;
         }
         return false;
     }
 
-    private void PickupAndRelease(RaycastHit hit)
+    private bool IsGrabPressed()
     {
-        if (pickable == null && hit.collider != null && IsGrabbing())
+        if (device.TryGetFeatureValue(CommonUsages.gripButton, out bool isGrabPressed))
+        {
+            return isGrabPressed;
+        }
+        return false;
+    }
+
+    private void TryPickupAndRelease(RaycastHit hit)
+    {
+        if (pickable == null && hit.collider != null && IsTriggerPressed())
         {
             pickable = hit.collider.gameObject.GetComponent<Pickable>();
             if (pickable != null)
@@ -80,13 +92,36 @@ public class ControllerInput : MonoBehaviour
                 pickable.Pickup(this);
             }
         }
-        else if (pickable != null && !IsGrabbing())
+        else if (pickable != null && !IsTriggerPressed() && !IsGrabPressed())
         {
             pickable.Release(this, device);
             pickable = null;
         }
     }
 
+    private void TryGrabAndRelease()
+    {
+        if (pickable == null && grabInteractionZone != null && IsGrabPressed())
+        {
+            Collider[] hitColliders = new Collider[10];
+            int collidersFoundCount = Physics.OverlapSphereNonAlloc(grabInteractionZone.transform.position, grabInteractionZone.radius, hitColliders);
+            for (int  i = 0; i < collidersFoundCount; i++)
+            {
+                pickable = hitColliders[i].GetComponent<Pickable>();
+                if (pickable != null)
+                {
+                    pickable.Pickup(this);
+                    break;
+                }
+            }
+        }
+        else if (pickable != null && !IsTriggerPressed() && !IsGrabPressed())
+        {
+            pickable.Release(this, device);
+            pickable = null;
+        }
+    }
+    
     private void UpdatePlayerPosition()
     {
         if (characterController == null || deviceNode != XRNode.LeftHand)
