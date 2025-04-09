@@ -1,22 +1,34 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
 [RequireComponent(typeof(LineRenderer))]
 public class ControllerInput : MonoBehaviour
 {
+    [Header("Device")]
+    
     public XRNode deviceNode;
+    
+    private InputDevice device;
+    
+    [Header("Interaction")]
+    
     public float maxDistance = 10f;
     public LayerMask interactableLayers;
-
     public SphereCollider grabInteractionZone;
+    public float velocityBufferDuration = 0.25f;
+    
+    private LineRenderer lineRenderer;
+    private Pickable pickable = null;
+    private Queue<(Vector3 velocity, float timestamp)> velocityBuffer = new();
+    private Queue<(Vector3 angularVelocity, float timestamp)> angularVelocityBuffer = new();
+    
+    [Header("Movement")]
     
     public float movementSpeed = 5.0f;
     public CharacterController characterController;
     public float turnSpeed = 60.0f;
     
-    private InputDevice device;
-    private LineRenderer lineRenderer;
-    private Pickable pickable = null;
     
     void Start()
     {
@@ -26,12 +38,27 @@ public class ControllerInput : MonoBehaviour
 
     void Update()
     {
+        ComputeAverageVelocity();
+        
+        // Movement 
         UpdatePlayerPosition();
         UpdatePlayerRotation();
+        
+        // Interaction 
         TryPickupAndRelease(AimingRaycast());
         TryGrabAndRelease();
     }
 
+    public Vector3 GetAverageVelocity()
+    {
+        return GetAverageVectorFromBuffer(velocityBuffer);
+    }
+
+    public Vector3 GetAverageAngularVelocity()
+    {
+        return GetAverageVectorFromBuffer(angularVelocityBuffer);
+    }
+    
     private RaycastHit AimingRaycast()
     {
         Vector3 origin = transform.position;
@@ -94,7 +121,7 @@ public class ControllerInput : MonoBehaviour
         }
         else if (pickable != null && !IsTriggerPressed() && !IsGrabPressed())
         {
-            pickable.Release(this, device);
+            pickable.Release(this);
             pickable = null;
         }
     }
@@ -117,7 +144,7 @@ public class ControllerInput : MonoBehaviour
         }
         else if (pickable != null && !IsTriggerPressed() && !IsGrabPressed())
         {
-            pickable.Release(this, device);
+            pickable.Release(this);
             pickable = null;
         }
     }
@@ -147,5 +174,37 @@ public class ControllerInput : MonoBehaviour
         
         float turnAmount = turnInput.x * turnSpeed * Time.deltaTime;
         characterController.transform.Rotate(0, turnAmount, 0);
+    }
+
+    private void ComputeAverageVelocity()
+    {
+        if (device.TryGetFeatureValue(CommonUsages.deviceVelocity, out Vector3 velocityInput)
+            && device.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out Vector3 angularVelocityInput))
+        {
+            float now = Time.time;
+            velocityBuffer.Enqueue((velocityInput, now));
+            angularVelocityBuffer.Enqueue((angularVelocityInput, now));
+
+            while (velocityBuffer.Count > 0 && now - velocityBuffer.Peek().timestamp > velocityBufferDuration)
+            {
+                velocityBuffer.Dequeue();
+            }
+        }
+    }
+
+    private Vector3 GetAverageVectorFromBuffer(Queue<(Vector3 velocity, float timestamp)> vectorBuffer)
+    {
+        if (vectorBuffer.Count == 0)
+        {
+            return Vector3.zero;
+        }
+
+        Vector3 velocitySum = Vector3.zero;
+        foreach ((Vector3 velocity, float timeStamp) in vectorBuffer)
+        {
+            velocitySum += velocity;
+        }
+        
+        return velocitySum / vectorBuffer.Count;
     }
 }

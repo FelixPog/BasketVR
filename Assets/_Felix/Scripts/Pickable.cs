@@ -34,19 +34,15 @@ public class Pickable : MonoBehaviour
         rigidBody.velocity = Vector3.zero;
     }
 
-    public void Release(ControllerInput releaseController, InputDevice releaseDevice)
+    public void Release(ControllerInput releaseController)
     {
         if (releaseController != controller)
         {
             return;
         }
         
-        if (releaseDevice.TryGetFeatureValue(CommonUsages.deviceVelocity, out Vector3 velocity)
-            && releaseDevice.TryGetFeatureValue(CommonUsages.deviceAngularVelocity, out Vector3 angularVelocity))
-        {
-            rigidBody.velocity = velocity;
-            rigidBody.angularVelocity = angularVelocity;
-        }
+        rigidBody.velocity = controller.GetAverageVelocity();
+        rigidBody.angularVelocity = controller.GetAverageAngularVelocity();
         
         controller = null;
         transform.parent = null;
