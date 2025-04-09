@@ -7,6 +7,10 @@ public class ControllerInput : MonoBehaviour
     public XRNode deviceNode;
     public float maxDistance = 10f;
     public LayerMask interactableLayers;
+
+    public float movementSpeed = 5.0f;
+    public CharacterController characterController;
+    public float turnSpeed = 60.0f;
     
     private InputDevice device;
     private LineRenderer lineRenderer;
@@ -20,21 +24,9 @@ public class ControllerInput : MonoBehaviour
 
     void Update()
     {
-        RaycastHit hit = AimingRaycast();
-
-        if (pickable == null && hit.collider != null && IsGrabbing())
-        {
-            pickable = hit.collider.gameObject.GetComponent<Pickable>();
-            if (pickable != null)
-            {
-                pickable.Pickup(this);
-            }
-        }
-        else if (pickable != null && !IsGrabbing())
-        {
-            pickable.Release(this, device);
-            pickable = null;
-        }
+        UpdatePlayerPosition();
+        UpdatePlayerRotation();
+        PickupAndRelease(AimingRaycast());
     }
 
     private RaycastHit AimingRaycast()
@@ -71,10 +63,54 @@ public class ControllerInput : MonoBehaviour
     
     private bool IsGrabbing()
     {
-        if (device.TryGetFeatureValue(CommonUsages.gripButton, out bool isGrabbing))
+        if (device.TryGetFeatureValue(CommonUsages.triggerButton, out bool isGrabbing))
         {
             return isGrabbing;
         }
         return false;
+    }
+
+    private void PickupAndRelease(RaycastHit hit)
+    {
+        if (pickable == null && hit.collider != null && IsGrabbing())
+        {
+            pickable = hit.collider.gameObject.GetComponent<Pickable>();
+            if (pickable != null)
+            {
+                pickable.Pickup(this);
+            }
+        }
+        else if (pickable != null && !IsGrabbing())
+        {
+            pickable.Release(this, device);
+            pickable = null;
+        }
+    }
+
+    private void UpdatePlayerPosition()
+    {
+        if (characterController == null || deviceNode != XRNode.LeftHand)
+        {
+            return;
+        }
+        
+        device.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 moveInput);
+        Vector3 moveDirection = transform.TransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
+        moveDirection.y = 0.0f;
+
+        characterController.Move(moveDirection * movementSpeed * Time.deltaTime);
+    }
+
+    private void UpdatePlayerRotation()
+    {
+        if (deviceNode != XRNode.RightHand)
+        {
+            return;
+        }
+        
+        device.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 turnInput);
+        
+        float turnAmount = turnInput.x * turnSpeed * Time.deltaTime;
+        characterController.transform.Rotate(0, turnAmount, 0);
     }
 }

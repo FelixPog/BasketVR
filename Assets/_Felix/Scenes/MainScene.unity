@@ -1183,7 +1183,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 6e-44, z: 9e-44, w: 1.293e-41}
+  m_BoundingSphereOverride: {x: 0, y: 18.398438, z: 2.2e-44, w: 4.4682e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -2889,6 +2889,8 @@ MonoBehaviour:
   interactableLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  movementSpeed: 5
+  characterController: {fileID: 1446645227303682992}
 --- !u!23 &5070100834422841266
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4137,6 +4139,8 @@ MonoBehaviour:
   interactableLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  movementSpeed: 5
+  characterController: {fileID: 1446645227303682992}
 --- !u!4 &9177329049448494674
 Transform:
   m_ObjectHideFlags: 0
