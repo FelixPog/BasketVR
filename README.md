@@ -22,3 +22,7 @@ Depending on the type of game, ball shot could be more guided and use the rim po
 [Basket balls](https://assetstore.unity.com/packages/3d/props/basketball-realistic-313677)
 
 [Ground and wall materials](https://assetstore.unity.com/packages/2d/textures-materials/floors/20-man-made-ground-materials-12835)
+
+## Known bug
+
+Sometimes the XR rig get on the ball and the physics will make you fly away
