@@ -26,13 +26,13 @@ public class Pickable : MonoBehaviour
         }
         else if (controller != null && shouldRelease)
         {
+            rigidBody.isKinematic = false;
             shouldRelease = false;
             Vector3 velocity = controller.GetPeakAverageVelocity();
             rigidBody.velocity = velocity * throwPowerMultiplier;
-            rigidBody.angularVelocity = rigidBody.angularVelocity = controller.GetPeakAverageAngularVelocity();
+            rigidBody.angularVelocity = controller.GetPeakAverageAngularVelocity();
             controller = null;
             transform.parent = null;
-            rigidBody.isKinematic = false;
         }
     }
 

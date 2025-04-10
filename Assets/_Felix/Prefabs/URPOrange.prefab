@@ -135,5 +135,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afbe72899a5b2f3498a3aa771e228d13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwPowerMultiplier: 5
-  maxVelocity: 30
+  throwPowerMultiplier: 2.5
