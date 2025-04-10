@@ -5,7 +5,6 @@ using UnityEngine;
 public class Pickable : MonoBehaviour
 {
     [Min(0.0f)] public float throwPowerMultiplier = 1.5f;
-    //[Min(0.0f)] public float maxVelocity = 30.0f;
     
     private bool shouldRelease;
     private Rigidbody rigidBody;

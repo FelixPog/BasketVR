@@ -29,16 +29,11 @@ public class ControllerInput : MonoBehaviour
     
     public float movementSpeed = 5.0f;
     public CharacterController characterController;
-    public float turnSpeed = 60.0f;
-    
-    
-    private Vector3 lastPosition = Vector3.zero; 
     
     void Start()
     {
         device = InputDevices.GetDeviceAtXRNode(deviceNode);
         lineRenderer = GetComponent<LineRenderer>();
-        lastPosition = transform.position;
     }
 
     void Update()
@@ -47,7 +42,6 @@ public class ControllerInput : MonoBehaviour
         
         // Movement 
         UpdatePlayerPosition();
-        UpdatePlayerRotation();
         
         // Interaction 
         TryPickupAndRelease(AimingRaycast());
@@ -162,25 +156,26 @@ public class ControllerInput : MonoBehaviour
         }
         
         device.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 moveInput);
-        Vector3 moveDirection = transform.TransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
-        moveDirection.y = 0.0f;
 
-        characterController.Move(moveDirection * movementSpeed * Time.deltaTime);
-    }
-
-    private void UpdatePlayerRotation()
-    {
-        if (deviceNode != XRNode.RightHand)
+        if (moveInput == Vector2.zero)
         {
             return;
         }
-        
-        device.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 turnInput);
-        
-        float turnAmount = turnInput.x * turnSpeed * Time.deltaTime;
-        characterController.transform.Rotate(0, turnAmount, 0);
-    }
 
+        Transform cameraTransform = Camera.main.transform;
+        Vector3 cameraForward = cameraTransform.forward;
+        Vector3 cameraRight = cameraTransform.right;
+        
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+        cameraForward.Normalize();
+        cameraRight.Normalize();
+        
+        Vector3 moveDirection = cameraForward * moveInput.y + cameraRight * moveInput.x;
+
+        characterController.Move(moveDirection * movementSpeed * Time.deltaTime);
+    }
+    
     private void ComputeAverageVelocity()
     {
         if (device.TryGetFeatureValue(CommonUsages.deviceVelocity, out Vector3 velocityInput)
