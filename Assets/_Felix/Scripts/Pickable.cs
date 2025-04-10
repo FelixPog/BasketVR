@@ -53,4 +53,9 @@ public class Pickable : MonoBehaviour
         
         shouldRelease = true;
     }
+
+    public bool IsHeld()
+    {
+        return controller != null;
+    }
 }
